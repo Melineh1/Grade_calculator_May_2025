@@ -2,104 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Final Exam Grade Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grade Calculator</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      max-width: 400px;
-      margin: auto;
-    }
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-    #output div, #yearResult {
-      margin-bottom: 0.5rem;
-    }
+    body { font-family: sans-serif; padding: 1em; max-width: 500px; margin: auto; }
+    input { width: 100%; margin: 0.5em 0; padding: 0.5em; font-size: 1em; }
+    .result { margin-top: 1em; white-space: pre-line; }
   </style>
 </head>
 <body>
   <h2>Final Exam Grade Needed</h2>
-  <label>9 Weeks Grade 1:</label>
-  <input type="number" id="nw1" placeholder="Enter NW3 grade" />
-  <label>9 Weeks Grade 2:</label>
-  <input type="number" id="nw2" placeholder="Enter NW4 grade" />
-  <div id="output"></div>
+  <label>9 Weeks 3 Grade:</label>
+  <input class="grade-input" type="number" id="nw3" placeholder="e.g. 75" />
 
-  <h2>Yearly Average Checker</h2>
+  <label>9 Weeks 4 Grade:</label>
+  <input class="grade-input" type="number" id="nw4" placeholder="e.g. 80" />
+
   <label>Semester 1 Grade:</label>
-  <input type="number" id="semester1" placeholder="Enter Semester 1 grade" />
-  <label>Semester 2 Grade:</label>
-  <input type="number" id="semester2" placeholder="Auto-filled from above" disabled />
-  <div id="yearResult"></div>
+  <input class="grade-input" type="number" id="sem1" placeholder="e.g. 68" />
+
+  <div class="result" id="finalNeeded"></div>
+  <div class="result" id="yearResult"></div>
 
   <script>
-    const nw1 = document.getElementById('nw1');
-    const nw2 = document.getElementById('nw2');
-    const output = document.getElementById('output');
-    const semester1 = document.getElementById('semester1');
-    const semester2 = document.getElementById('semester2');
-    const yearResult = document.getElementById('yearResult');
+    const nw3Input = document.getElementById("nw3");
+    const nw4Input = document.getElementById("nw4");
+    const sem1Input = document.getElementById("sem1");
+    const finalNeededDiv = document.getElementById("finalNeeded");
+    const yearResultDiv = document.getElementById("yearResult");
 
-    function calculateNeededGrades() {
-      const a = parseFloat(nw1.value);
-      const b = parseFloat(nw2.value);
+    function calculate() {
+      const nw3 = parseFloat(nw3Input.value);
+      const nw4 = parseFloat(nw4Input.value);
+      const sem1 = parseFloat(sem1Input.value);
 
-      if (isNaN(a) || isNaN(b)) {
-        output.innerHTML = "";
-        semester2.value = "";
-        yearResult.innerText = "";
+      if (isNaN(nw3) || isNaN(nw4)) {
+        finalNeededDiv.textContent = "Enter both Nine Weeks grades.";
+        yearResultDiv.textContent = "";
         return;
       }
 
-      const base = a * 0.45 + b * 0.45;
+      const needed = (target) => Math.max(0, ((target - (nw3 * 0.45 + nw4 * 0.45)) / 0.1).toFixed(2));
 
-      function neededGrade(target) {
-        return Math.max(0, Math.round((target - base) / 0.1));
-      }
+      finalNeededDiv.textContent =
+        `To get a 70 average: Final Exam = ${needed(70)}\n` +
+        `To get an 80 average: Final Exam = ${needed(80)}\n` +
+        `To get a 90 average: Final Exam = ${needed(90)}`;
 
-      const needed70 = neededGrade(70);
-      const needed80 = neededGrade(80);
-      const needed90 = neededGrade(90);
-
-      output.innerHTML = `
-        <div>To get a 70: <strong>${needed70}</strong></div>
-        <div>To get an 80: <strong>${needed80}</strong></div>
-        <div>To get a 90: <strong>${needed90}</strong></div>
-      `;
-
-      // Example Semester 2 grade using a 70 on final
-      const estSem2 = (base + 70 * 0.1).toFixed(2);
-      semester2.value = estSem2;
-
-      checkYearlyAverage();
-    }
-
-    function checkYearlyAverage() {
-      const s1 = parseFloat(semester1.value);
-      const s2 = parseFloat(semester2.value);
-
-      if (isNaN(s1) || isNaN(s2)) {
-        yearResult.innerText = "";
-        return;
-      }
-
-      const avg = ((s1 + s2) / 2).toFixed(2);
-
-      if (avg >= 70 && s1 >= 60) {
-        yearResult.innerText = "✅ You passed for the year! Please verify with your counselor.";
+      if (!isNaN(sem1)) {
+        const sem2 = ((nw3 * 0.45) + (nw4 * 0.45) + (70 * 0.1)); // assuming 70 on final
+        const yearAvg = ((sem1 + sem2) / 2).toFixed(2);
+        if (yearAvg >= 70 && sem1 >= 60) {
+          yearResultDiv.textContent = `Estimated Year Average: ${yearAvg}\n✅ You passed for the year (verify with counselor).`;
+        } else {
+          yearResultDiv.textContent = `Estimated Year Average: ${yearAvg}\n❌ You may not pass. See counselor.`;
+        }
       } else {
-        yearResult.innerText = "⚠️ You may not pass for the year. Please see your counselor.";
+        yearResultDiv.textContent = "";
       }
     }
 
-    nw1.addEventListener('input', calculateNeededGrades);
-    nw2.addEventListener('input', calculateNeededGrades);
-    semester1.addEventListener('input', checkYearlyAverage);
-  </script>
-</body>
-</html>
+    document.querySelectorAll('.grade-input').forEach((
