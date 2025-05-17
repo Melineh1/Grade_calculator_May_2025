@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Final Exam Grade Needed Calculator</title>
+  <title>Final Exam Grade Calculator</title>
   <style>
     body {
       font-family: sans-serif;
@@ -56,15 +56,50 @@
         return;
       }
 
-      const avg = (a * 0.45) + (b * 0.45);
-      const needed70 = Math.max(0, Math.round((70 - avg) / 0.1));
-      const needed80 = Math.max(0, Math.round((80 - avg) / 0.1));
-      const needed90 = Math.max(0, Math.round((90 - avg) / 0.1));
+      const base = a * 0.45 + b * 0.45;
+
+      function neededGrade(target) {
+        return Math.max(0, Math.round((target - base) / 0.1));
+      }
+
+      const needed70 = neededGrade(70);
+      const needed80 = neededGrade(80);
+      const needed90 = neededGrade(90);
 
       output.innerHTML = `
-        <div>To pass (70): <strong>${needed70}</strong></div>
-        <div>To get 80: <strong>${needed80}</strong></div>
-        <div>To get 90: <strong>${needed90}</strong></div>
+        <div>To get a 70: <strong>${needed70}</strong></div>
+        <div>To get an 80: <strong>${needed80}</strong></div>
+        <div>To get a 90: <strong>${needed90}</strong></div>
       `;
 
-      const estimatedFinal = 70;
+      // Example Semester 2 grade using a 70 on final
+      const estSem2 = (base + 70 * 0.1).toFixed(2);
+      semester2.value = estSem2;
+
+      checkYearlyAverage();
+    }
+
+    function checkYearlyAverage() {
+      const s1 = parseFloat(semester1.value);
+      const s2 = parseFloat(semester2.value);
+
+      if (isNaN(s1) || isNaN(s2)) {
+        yearResult.innerText = "";
+        return;
+      }
+
+      const avg = ((s1 + s2) / 2).toFixed(2);
+
+      if (avg >= 70 && s1 >= 60) {
+        yearResult.innerText = "✅ You passed for the year! Please verify with your counselor.";
+      } else {
+        yearResult.innerText = "⚠️ You may not pass for the year. Please see your counselor.";
+      }
+    }
+
+    nw1.addEventListener('input', calculateNeededGrades);
+    nw2.addEventListener('input', calculateNeededGrades);
+    semester1.addEventListener('input', checkYearlyAverage);
+  </script>
+</body>
+</html>
